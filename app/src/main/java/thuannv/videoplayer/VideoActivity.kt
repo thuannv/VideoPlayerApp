@@ -8,7 +8,7 @@ class VideoActivity : AppCompatActivity() {
 
     lateinit var playerHolder: PlayerHolder
 
-    val state = PlayerState()
+    val state = PlayerState(0, 0, true, MediaSourceType.PLAY_LIST)
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

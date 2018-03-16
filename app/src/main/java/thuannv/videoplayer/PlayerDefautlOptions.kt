@@ -21,22 +21,22 @@ import org.jetbrains.anko.info
 enum class MediaSourceType {
     LOCAL_AUDIO,
     LOCAL_VIDEO,
-//    HTTP_AUDIO,
-//    HTTP_VIDEO,
+    HTTP_AUDIO,
+    HTTP_VIDEO,
     PLAY_LIST;
 }
 
 val mediaMap = mapOf<MediaSourceType, Uri>(
         MediaSourceType.LOCAL_AUDIO to Uri.parse("asset:///audio/demo.mp3"),
-        MediaSourceType.LOCAL_VIDEO to Uri.parse("asset:///video/big_buck_bunny.mp4")
-//        MediaSourceType.HTTP_AUDIO to Uri.parse("http://site.../file.mp3"),
-//        MediaSourceType.HTTP_VIDEO to Uri.parse("http://site.../file.mp4")
+        MediaSourceType.LOCAL_VIDEO to Uri.parse("asset:///video/big_buck_bunny.mp4"),
+        MediaSourceType.HTTP_AUDIO to Uri.parse("http://www.kozco.com/tech/piano2-CoolEdit.mp3"),
+        MediaSourceType.HTTP_VIDEO to Uri.parse("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4")
 )
 
 data class PlayerState(var window: Int = 0,
                        var position: Long = 0,
                        var whenReady: Boolean = true,
-                       var sourceType: MediaSourceType = MediaSourceType.LOCAL_AUDIO)
+                       var sourceType: MediaSourceType = MediaSourceType.LOCAL_VIDEO)
 
 
 class PlayerHolder(val context: Context,
@@ -59,8 +59,8 @@ class PlayerHolder(val context: Context,
                 val playlist = DynamicConcatenatingMediaSource()
                 playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.LOCAL_AUDIO))
                 playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.LOCAL_VIDEO))
-//                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_AUDIO))
-//                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_VIDEO))
+                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_AUDIO))
+                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_VIDEO))
                 return playlist
             }
             else -> {
@@ -70,9 +70,8 @@ class PlayerHolder(val context: Context,
     }
 
     private fun createExtractorMediaSource(sourceType: MediaSourceType): MediaSource {
-        return ExtractorMediaSource.Factory(
-                DefaultDataSourceFactory(context, "exoplayer-learning"))
-                .createMediaSource(mediaMap.get(sourceType))
+        val defaultDataSourceFactory = DefaultDataSourceFactory(context, "exoplayer");
+        return ExtractorMediaSource.Factory(defaultDataSourceFactory).createMediaSource(mediaMap.get(sourceType))
     }
 
     fun start() {
