@@ -8,7 +8,7 @@ import com.google.android.exoplayer2.ext.mediasession.MediaSessionConnector
 import com.google.android.exoplayer2.ext.mediasession.TimelineQueueNavigator
 import com.google.android.exoplayer2.ui.PlayerView
 
-class VideoActivity : AppCompatActivity() {
+class PlayerActivity : AppCompatActivity() {
 
     private val state = PlayerState(0, 0, true, MediaSourceType.PLAY_LIST)
 

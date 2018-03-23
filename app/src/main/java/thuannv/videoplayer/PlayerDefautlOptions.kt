@@ -1,7 +1,9 @@
 package thuannv.videoplayer
 
 import android.content.Context
+import android.media.AudioManager
 import android.net.Uri
+import android.support.v4.media.AudioAttributesCompat
 import android.support.v4.media.MediaDescriptionCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
@@ -13,6 +15,7 @@ import com.google.android.exoplayer2.ui.PlayerView
 import com.google.android.exoplayer2.upstream.DefaultDataSourceFactory
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import thuannv.videoplayer.AudioFocusWraper
 
 /**
  * @author thuannv
@@ -47,12 +50,35 @@ class PlayerHolder(val context: Context,
     val player: ExoPlayer
 
     init {
-        player = ExoPlayerFactory.newSimpleInstance(context, DefaultTrackSelector())
-                .also {
-                    playerView.player = it // bind to the view
-                    info { "SimpleExoPlayer is created." }
-                }
+
+
+        val audioManager = context.getSystemService(Context.AUDIO_SERVICE) as AudioManager
+
+        val audioAttributes = AudioAttributesCompat.Builder()
+                .setContentType(AudioAttributesCompat.CONTENT_TYPE_MUSIC)
+                .setUsage(AudioAttributesCompat.USAGE_MEDIA)
+                .build()
+
+
+
+//        player = ExoPlayerFactory.newSimpleInstance(context, DefaultTrackSelector())
+//                .also {
+//                    playerView.player = it // bind to the view
+//                    info { "SimpleExoPlayer is created." }
+//                }
+
+        player = AudioFocusWraper(
+                audioAttributes,
+                audioManager,
+                ExoPlayerFactory.newSimpleInstance(
+                        context, DefaultTrackSelector())
+                        .apply {
+                            playerView.player = this
+                        })
+
+        info { "SimpleExoPlayer is created." }
     }
+
 
 
     private fun buildMediaSource(sourceType: MediaSourceType): MediaSource {
