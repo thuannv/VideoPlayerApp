@@ -2,9 +2,10 @@ package thuannv.videoplayer
 
 import android.content.Context
 import android.net.Uri
+import android.support.v4.media.MediaDescriptionCompat
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.ExoPlayerFactory
-import com.google.android.exoplayer2.source.DynamicConcatenatingMediaSource
+import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ExtractorMediaSource
 import com.google.android.exoplayer2.source.MediaSource
 import com.google.android.exoplayer2.trackselection.DefaultTrackSelector
@@ -42,6 +43,7 @@ data class PlayerState(var window: Int = 0,
 class PlayerHolder(val context: Context,
                    val playerView: PlayerView,
                    val playerState: PlayerState) : AnkoLogger {
+
     val player: ExoPlayer
 
     init {
@@ -53,24 +55,30 @@ class PlayerHolder(val context: Context,
     }
 
 
-    fun buildMediaSource(sourceType: MediaSourceType): MediaSource {
-        when (sourceType) {
-            MediaSourceType.PLAY_LIST -> {
-                val playlist = DynamicConcatenatingMediaSource()
-                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.LOCAL_AUDIO))
-                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.LOCAL_VIDEO))
-                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_AUDIO))
-                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_VIDEO))
-                return playlist
-            }
-            else -> {
-                return createExtractorMediaSource(sourceType)
-            }
+    private fun buildMediaSource(sourceType: MediaSourceType): MediaSource {
+//        when (sourceType) {
+//            MediaSourceType.PLAY_LIST -> {
+//                val playlist = DynamicConcatenatingMediaSource()
+//                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.LOCAL_AUDIO))
+//                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.LOCAL_VIDEO))
+//                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_AUDIO))
+//                playlist.addMediaSource(createExtractorMediaSource(MediaSourceType.HTTP_VIDEO))
+//                return playlist
+//            }
+//            else -> {
+//                return createExtractorMediaSource(sourceType)
+//            }
+//        }
+
+
+        return when (sourceType) {
+            MediaSourceType.PLAY_LIST -> buildMediaSourceForMediaSesssionDemo(context)
+            else -> createExtractorMediaSource(sourceType)
         }
     }
 
     private fun createExtractorMediaSource(sourceType: MediaSourceType): MediaSource {
-        val defaultDataSourceFactory = DefaultDataSourceFactory(context, "exoplayer");
+        val defaultDataSourceFactory = DefaultDataSourceFactory(context, "PlayerApp");
         return ExtractorMediaSource.Factory(defaultDataSourceFactory).createMediaSource(mediaMap.get(sourceType))
     }
 
@@ -109,3 +117,64 @@ class PlayerHolder(val context: Context,
         info { "SimpleExoPlayer is released." }
     }
 }
+
+object MediaCatalog {
+
+    val list = mutableListOf<MediaDescriptionCompat>()
+
+    init {
+        list.add(
+                with(MediaDescriptionCompat.Builder()) {
+                    setDescription("MP3 loaded over Assets")
+                    setMediaId("1")
+                    setMediaUri(Uri.parse("asset:///audio/demo.mp3"))
+                    setTitle("Yêu là cùng nhìn về 1 hướng")
+                    setSubtitle("MP3 music")
+                    build()
+                })
+
+        list.add(
+                with(MediaDescriptionCompat.Builder()) {
+                    setDescription("Video loaded from Assets")
+                    setMediaId("1")
+                    setMediaUri(Uri.parse("asset:///video/big_buck_bunny.mp4"))
+                    setTitle("Big Buck Bunny")
+                    setSubtitle("MP4 Cartoon")
+                    build()
+                })
+
+        list.add(
+                with(MediaDescriptionCompat.Builder()) {
+                    setDescription("MP3 loaded over HTTP")
+                    setMediaId("1")
+                    setMediaUri(Uri.parse("http://www.kozco.com/tech/piano2-CoolEdit.mp3"))
+                    setTitle("Piano")
+                    setSubtitle("MP3 music")
+                    build()
+                })
+
+        list.add(
+                with(MediaDescriptionCompat.Builder()) {
+                    setDescription("MP3 loaded over HTTP")
+                    setMediaId("1")
+                    setMediaUri(Uri.parse("http://clips.vorwaerts-gmbh.de/VfE_html5.mp4"))
+                    setTitle("Big Buck Bunny")
+                    setSubtitle("MP4 Cartoon")
+                    build()
+                })
+
+    }
+}
+
+fun createExtractorMediaSource(context: Context, uri: Uri): MediaSource {
+    return ExtractorMediaSource.Factory(DefaultDataSourceFactory(context, "PlayerApp")).createMediaSource(uri)
+}
+
+fun buildMediaSourceForMediaSesssionDemo(context: Context): MediaSource {
+    val mediaSources = mutableListOf<MediaSource>()
+    MediaCatalog.list.forEach {
+        mediaSources.add(createExtractorMediaSource(context, it.mediaUri!!))
+    }
+    return ConcatenatingMediaSource(*mediaSources.toTypedArray())
+}
+
